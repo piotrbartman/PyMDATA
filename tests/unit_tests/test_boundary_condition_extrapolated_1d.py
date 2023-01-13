@@ -15,12 +15,16 @@ class TestBoundaryConditionExtrapolated:
         "data",
         (np.array([1, 2, 3, 4], dtype=float), np.array([1, 2, 3, 4], dtype=complex)),
     )
-    def test_1d_scalar(data, n_threads=1, halo=1):
+    def test_1d_scalar(data, n_threads_, halo=1, left_first=True):
         # arrange
         boundary_conditions = (Extrapolated(),)
         field = ScalarField(data, halo, boundary_conditions)
         traversals = Traversals(
-            grid=field.grid, halo=halo, jit_flags=JIT_FLAGS, n_threads=n_threads
+            grid=field.grid,
+            halo=halo,
+            jit_flags=JIT_FLAGS,
+            n_threads=n_threads_,
+            left_first=left_first,
         )
         field.assemble(traversals)
         meta_and_data, fill_halos = field.impl
@@ -36,12 +40,16 @@ class TestBoundaryConditionExtrapolated:
 
     @staticmethod
     @pytest.mark.parametrize("data", (np.array([1, 2, 3, 4], dtype=float),))
-    def test_1d_vector(data, n_threads=1, halo=2):
+    def test_1d_vector(data, n_threads_, halo=2, left_first=True):
         # arrange
         boundary_condition = (Extrapolated(),)
         field = VectorField((data,), halo, boundary_condition)
         traversals = Traversals(
-            grid=field.grid, halo=halo, jit_flags=JIT_FLAGS, n_threads=n_threads
+            grid=field.grid,
+            halo=halo,
+            jit_flags=JIT_FLAGS,
+            n_threads=n_threads_,
+            left_first=left_first,
         )
         field.assemble(traversals)
         meta_and_data, fill_halos = field.impl

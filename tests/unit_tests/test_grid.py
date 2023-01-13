@@ -45,30 +45,30 @@ class TestStaticGrid:
     @staticmethod
     @pytest.mark.parametrize("span", (3, 30, 300))
     @pytest.mark.parametrize("n_threads", (1, 2, 3))
-    def test_make_irng_static(span, n_threads):
+    def test_make_irng_static(span, n_threads_):
         # arrange
         assert span != meta[META_N_OUTER]
         subdomain = make_subdomain(JIT_FLAGS)
 
         # act
-        irng_fun = make_chunk(span=span, n_threads=n_threads, jit_flags=JIT_FLAGS)
+        irng_fun = make_chunk(span=span, n_threads=n_threads_, jit_flags=JIT_FLAGS)
 
         # assert
-        for thread_id in range(n_threads):
-            assert subdomain(span, thread_id, n_threads) == irng_fun(meta, thread_id)
+        for thread_id in range(n_threads_):
+            assert subdomain(span, thread_id, n_threads_) == irng_fun(meta, thread_id)
 
     @staticmethod
     @pytest.mark.parametrize("n_threads", (1, 2, 3))
-    def test_make_irng_dynamic(n_threads):
+    def test_make_irng_dynamic(n_threads_):
         # arrange
         span = 0
         subdomain = make_subdomain(JIT_FLAGS)
 
         # act
-        irng_fun = make_chunk(span=span, n_threads=n_threads, jit_flags=JIT_FLAGS)
+        irng_fun = make_chunk(span=span, n_threads=n_threads_, jit_flags=JIT_FLAGS)
 
         # assert
-        for thread_id in range(n_threads):
-            assert subdomain(meta[META_N_OUTER], thread_id, n_threads) == irng_fun(
+        for thread_id in range(n_threads_):
+            assert subdomain(meta[META_N_OUTER], thread_id, n_threads_) == irng_fun(
                 meta, thread_id
             )

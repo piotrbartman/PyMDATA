@@ -15,7 +15,7 @@ class TestPolarBoundaryCondition:
     @staticmethod
     @pytest.mark.parametrize("halo", (1,))
     @pytest.mark.parametrize("n_threads", (1, 2, 3))
-    def test_scalar_2d(halo, n_threads):
+    def test_scalar_2d(halo, n_threads_, left_first=True):
         # arrange
         data = np.array([[1, 6], [2, 7], [3, 8], [4, 9]], dtype=float)
         boundary_condition = (
@@ -23,8 +23,13 @@ class TestPolarBoundaryCondition:
             Polar(grid=data.shape, longitude_idx=OUTER, latitude_idx=INNER),
         )
         field = ScalarField(data, halo, boundary_condition)
+        # pylint:disable=duplicate-code
         traversals = Traversals(
-            grid=data.shape, halo=halo, jit_flags=JIT_FLAGS, n_threads=n_threads
+            grid=data.shape,
+            halo=halo,
+            jit_flags=JIT_FLAGS,
+            n_threads=n_threads_,
+            left_first=left_first,
         )
         field.assemble(traversals)
         meta_and_data, fill_halos = field.impl
@@ -32,7 +37,7 @@ class TestPolarBoundaryCondition:
 
         # act
         # pylint: disable-next=not-an-iterable
-        for thread_id in numba.prange(n_threads):
+        for thread_id in numba.prange(n_threads_):
             sut(thread_id, *meta_and_data, *fill_halos)
 
         # assert
@@ -48,7 +53,7 @@ class TestPolarBoundaryCondition:
     @staticmethod
     @pytest.mark.parametrize("halo", (1,))
     @pytest.mark.parametrize("n_threads", (1, 2, 3))
-    def test_vector_2d(halo, n_threads):
+    def test_vector_2d(halo, n_threads_, left_first=True):
         # arrange
         grid = (4, 2)
         data = (
@@ -78,7 +83,7 @@ class TestPolarBoundaryCondition:
         )
         field = VectorField(data, halo, boundary_conditions)
         traversals = Traversals(
-            grid=grid, halo=halo, jit_flags=JIT_FLAGS, n_threads=n_threads
+            grid=grid, halo=halo, jit_flags=JIT_FLAGS, n_threads=n_threads_, left_first=left_first,
         )
         field.assemble(traversals)
         meta_and_data, fill_halos = field.impl
@@ -86,7 +91,7 @@ class TestPolarBoundaryCondition:
 
         # act
         # pylint: disable-next=not-an-iterable
-        for thread_id in numba.prange(n_threads):
+        for thread_id in numba.prange(n_threads_):
             sut(thread_id, *meta_and_data, *fill_halos)
 
         # assert
